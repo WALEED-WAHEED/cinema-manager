@@ -211,24 +211,26 @@ public class CinemaManager {
     }
 
     /**
-     * Prints seating as numeric values 0–3, with column indices and a legend.
+     * Prints seating: column numbers at top, each row as "Row r: ...", legend at bottom.
      */
     public void printSeating() {
-        System.out.println("\n--- SEATING (numeric) ---");
-        System.out.println("Legend: 0=available, 1=booked, 2=broken, 3=VIP");
-        System.out.print("Row   ");
+        System.out.println("\n--- SEATING ---");
+        // Column numbers at the top
+        System.out.print("     ");
         for (int c = 0; c < cols; c++) {
             System.out.print(" " + c);
         }
         System.out.println();
-        System.out.println("------" + "---".repeat(Math.max(0, cols)));
+        // Each row as "Row r: ..."
         for (int r = 0; r < rows; r++) {
-            System.out.print(" " + r + "    ");
+            System.out.print("Row " + r + ":");
             for (int c = 0; c < cols; c++) {
                 System.out.print(" " + seats[r][c]);
             }
             System.out.println();
         }
+        // Legend at the bottom
+        System.out.println("Legend: 0=available, 1=booked, 2=broken, 3=VIP");
         System.out.println();
     }
 }

@@ -2,15 +2,29 @@ import java.util.Scanner;
 
 /**
  * CinemaApp - Handles the menu and main. Uses CinemaManager for all logic.
+ * Input validation prevents crashes on invalid input.
  */
 public class CinemaApp {
 
+    /** Reads a positive int with retry on invalid input; never throws. */
+    private static int readPositiveInt(Scanner scanner, String prompt, String errorMsg) {
+        while (true) {
+            System.out.print(prompt);
+            String line = scanner.nextLine();
+            if (line == null) line = "";
+            line = line.trim();
+            try {
+                int n = Integer.parseInt(line);
+                if (n > 0) return n;
+            } catch (NumberFormatException ignored) { }
+            System.out.println(errorMsg);
+        }
+    }
+
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter number of rows: ");
-        int rows = Integer.parseInt(scanner.nextLine().trim());
-        System.out.print("Enter number of columns: ");
-        int cols = Integer.parseInt(scanner.nextLine().trim());
+        int rows = readPositiveInt(scanner, "Enter number of rows: ", "Invalid. Enter a positive number.");
+        int cols = readPositiveInt(scanner, "Enter number of columns: ", "Invalid. Enter a positive number.");
         CinemaManager cinema = new CinemaManager(rows, cols);
 
         boolean running = true;
@@ -26,7 +40,9 @@ public class CinemaApp {
             System.out.println("6. Book a group and show updated seating");
             System.out.println("7. Exit");
             System.out.print("Choose an option (1-7): ");
-            String input = scanner.nextLine().trim();
+            String input = scanner.nextLine();
+            if (input == null) input = "";
+            input = input.trim();
             int choice = -1;
             try {
                 choice = Integer.parseInt(input);
@@ -47,32 +63,58 @@ public class CinemaApp {
                     System.out.println("VIP: " + cinema.getVIPCount());
                     System.out.printf("Occupancy rate: %.1f%%%n%n", cinema.getOccupancyRate());
                     break;
-                case 3:
+                case 3: {
                     System.out.print("Enter row index (0-" + (cinema.getRows() - 1) + "): ");
+                    String line = scanner.nextLine();
+                    if (line == null) line = "";
                     try {
-                        int row = Integer.parseInt(scanner.nextLine().trim());
-                        boolean usable = cinema.isRowUsable(row);
-                        System.out.println("Row " + row + " is " + (usable ? "usable" : "not usable") + ".");
+                        int row = Integer.parseInt(line.trim());
+                        if (row >= 0 && row < cinema.getRows()) {
+                            boolean usable = cinema.isRowUsable(row);
+                            System.out.println("Row " + row + " is " + (usable ? "usable" : "not usable") + ".");
+                        } else {
+                            System.out.println("Invalid row. Enter 0 to " + (cinema.getRows() - 1) + ".");
+                        }
                     } catch (NumberFormatException e) {
-                        System.out.println("Invalid row.");
+                        System.out.println("Invalid input. Enter a number.");
                     }
                     break;
-                case 4:
+                }
+                case 4: {
                     System.out.print("Enter row index (0-" + (cinema.getRows() - 1) + "): ");
+                    String lineRow = scanner.nextLine();
+                    if (lineRow == null) lineRow = "";
                     try {
-                        int row = Integer.parseInt(scanner.nextLine().trim());
+                        int row = Integer.parseInt(lineRow.trim());
+                        if (row < 0 || row >= cinema.getRows()) {
+                            System.out.println("Invalid row. Enter 0 to " + (cinema.getRows() - 1) + ".");
+                            break;
+                        }
                         System.out.print("Enter group size (1-" + cinema.getCols() + "): ");
-                        int size = Integer.parseInt(scanner.nextLine().trim());
+                        String lineSize = scanner.nextLine();
+                        if (lineSize == null) lineSize = "";
+                        int size = Integer.parseInt(lineSize.trim());
+                        if (size < 1 || size > cinema.getCols()) {
+                            System.out.println("Invalid group size. Enter 1 to " + cinema.getCols() + ".");
+                            break;
+                        }
                         boolean can = cinema.canSeatGroupInRow(row, size);
                         System.out.println("Row " + row + " can " + (can ? "" : "not ") + "seat a group of " + size + ".");
                     } catch (NumberFormatException e) {
-                        System.out.println("Invalid input.");
+                        System.out.println("Invalid input. Enter numbers.");
                     }
                     break;
-                case 5:
+                }
+                case 5: {
                     System.out.print("Enter group size (1-" + cinema.getCols() + "): ");
+                    String line5 = scanner.nextLine();
+                    if (line5 == null) line5 = "";
                     try {
-                        int size = Integer.parseInt(scanner.nextLine().trim());
+                        int size = Integer.parseInt(line5.trim());
+                        if (size < 1 || size > cinema.getCols()) {
+                            System.out.println("Invalid group size. Enter 1 to " + cinema.getCols() + ".");
+                            break;
+                        }
                         int best = cinema.suggestBestRow(size);
                         if (best == -1) {
                             System.out.println("No row can seat a group of " + size + ".");
@@ -80,13 +122,20 @@ public class CinemaApp {
                             System.out.println("Suggested best row: " + best + " (most available seats).");
                         }
                     } catch (NumberFormatException e) {
-                        System.out.println("Invalid group size.");
+                        System.out.println("Invalid input. Enter a number.");
                     }
                     break;
-                case 6:
+                }
+                case 6: {
                     System.out.print("Enter group size (1-" + cinema.getCols() + "): ");
+                    String line6 = scanner.nextLine();
+                    if (line6 == null) line6 = "";
                     try {
-                        int size = Integer.parseInt(scanner.nextLine().trim());
+                        int size = Integer.parseInt(line6.trim());
+                        if (size < 1 || size > cinema.getCols()) {
+                            System.out.println("Invalid group size. Enter 1 to " + cinema.getCols() + ".");
+                            break;
+                        }
                         if (cinema.bookGroup(size)) {
                             System.out.println("Group of " + size + " booked. Updated seating:");
                             cinema.printSeating();
@@ -94,9 +143,10 @@ public class CinemaApp {
                             System.out.println("Could not book a group of " + size + ".");
                         }
                     } catch (NumberFormatException e) {
-                        System.out.println("Invalid group size.");
+                        System.out.println("Invalid input. Enter a number.");
                     }
                     break;
+                }
                 case 7:
                     running = false;
                     System.out.println("Goodbye!");
